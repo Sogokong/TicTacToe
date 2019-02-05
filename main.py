@@ -10,8 +10,6 @@ screen = pygame.display.set_mode(size)
 pygame.display.set_caption('Tic Tac Toe')
 
 
-
-
 # def isWinner(board):
 # # 	for i in range(3):
 # # 		row = {board[i][0].state, board[i][1].state, board[i][2].state}
@@ -32,81 +30,79 @@ pygame.display.set_caption('Tic Tac Toe')
 
 
 def iswinner(grid, player):
-	return ((grid[0][0].state == grid[0][1].state == grid[0][2].state == player) or
-			(grid[1][0].state == grid[1][1].state == grid[1][2].state == player) or
-			(grid[2][0].state == grid[2][1].state == grid[2][2].state == player) or
-	
-			(grid[0][0].state == grid[1][0].state == grid[2][0].state == player) or
-			(grid[0][1].state == grid[1][1].state == grid[2][1].state == player) or
-			(grid[0][2].state == grid[1][2].state == grid[2][2].state == player) or
-	
-			(grid[0][0].state == grid[1][1].state == grid[2][2].state == player) or
-			(grid[0][2].state == grid[1][1].state == grid[2][0].state == player))
+    return ((grid[0][0].state == grid[0][1].state == grid[0][2].state == player) or
+            (grid[1][0].state == grid[1][1].state == grid[1][2].state == player) or
+            (grid[2][0].state == grid[2][1].state == grid[2][2].state == player) or
+
+            (grid[0][0].state == grid[1][0].state == grid[2][0].state == player) or
+            (grid[0][1].state == grid[1][1].state == grid[2][1].state == player) or
+            (grid[0][2].state == grid[1][2].state == grid[2][2].state == player) or
+
+            (grid[0][0].state == grid[1][1].state == grid[2][2].state == player) or
+            (grid[0][2].state == grid[1][1].state == grid[2][0].state == player))
 
 
 def isTie(grid):
-	for i in range(3):
-		if grid[0][i].state == 0:
-			return False
-	for i in range(3):
-		if grid[1][i].state == 0:
-			return False
-	for i in range(3):
-		if grid[2][i].state == 0:
-			return False
-	return True
+    for i in range(3):
+        if grid[0][i].state == 0:
+            return False
+    for i in range(3):
+        if grid[1][i].state == 0:
+            return False
+    for i in range(3):
+        if grid[2][i].state == 0:
+            return False
+    return True
 
 
-def main(won):
-	clock = pygame.time.Clock()
-	w = 100
-	board = [[Cell(i, j, w) for i in range(3)] for j in range(3)]
-	player = 'X'
-	gameOver = False
-	while not gameOver:
-		# if won(board, player):
-		# 	print('{} has won'.format(player))
-		# 	gameOver = True
-		# 	pygame.quit()
-		# 	quit()
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT:
-				pygame.quit()
-			if event.type == pygame.MOUSEBUTTONDOWN:
-				mouseX, mouseY = pygame.mouse.get_pos()
-				for i in range(3):
-					for j in range(3):
-						if board[i][j].contains(mouseX, mouseY):
-							if player == 'X' and board[i][j].check(player):
-								board[i][j].drawX(screen)
-								if won(board, player):
-									print('{} has won'.format(player))
-									gameOver = True
-									# pygame.quit()
-									# quit()
-								elif not won(board, player):
-									player = 'O'
-								
-								# if won(board, player):
-								# 	print('{} has won'.format(player))
-								# 	gameOver = True
-								# 	break
-							
-							if player == 'O' and board[i][j].check(player):
-								board[i][j].drawO(screen)
-								if won(board, player):
-									print('{} has won'.format(player))
-									gameOver = True
-									# pygame.quit()
-									# quit()
-								elif not won(board, player):
-									player = 'X'
-		screen.fill(WHITE)
-		[[board[i][j].render(screen) for i in range(3)] for j in range(3)]
-		pygame.display.update()
-		clock.tick(60)
-	pygame.quit()
+def main(won, tie):
+    clock = pygame.time.Clock()
+    w = 100
+    board = [[Cell(i, j, w) for i in range(3)] for j in range(3)]
+    player = 'X'
+    done = False
+    gameOver = False
+    while not done:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True
+            if not gameOver:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mouseX, mouseY = pygame.mouse.get_pos()
+                    for i in range(3):
+                        for j in range(3):
+                            if board[i][j].contains(mouseX, mouseY):
+                                if player == 'X' and board[i][j].check(player):
+                                    board[i][j].drawX(screen)
+                                    if won(board, player):
+                                        print('{} has won'.format(player))
+                                        gameOver = True
+                                    elif tie(board):
+                                        print('It is a tie!')
+                                        gameOver = True
+                                    elif not won(board, player) and not tie(board):
+                                        player = 'O'
+
+                                if player == 'O' and board[i][j].check(player):
+                                    board[i][j].drawO(screen)
+                                    if won(board, player):
+                                        print('{} has won'.format(player))
+                                        gameOver = True
+                                    elif tie(board):
+                                        print('It is a tie!')
+                                        gameOver = True
+                                    elif not won(board, player) and not tie(board):
+                                        player = 'X'
+        screen.fill(WHITE)
+        [[board[i][j].render(screen) for i in range(3)] for j in range(3)]
+        if gameOver:
+            font = pygame.font.SysFont("Helevetica", 75)
+            text = font.render('Game Over', 1, (0, 255, 0))
+            screen.blit(text, (5, 140))
+        pygame.display.update()
+        clock.tick(60)
+    pygame.quit()
 
 
 if __name__ == '__main__':
-	main(iswinner)
+    main(iswinner, isTie)
